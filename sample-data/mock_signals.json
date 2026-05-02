@@ -1,0 +1,65 @@
+[
+  {
+    "component_id": "POSTGRES_PRIMARY",
+    "component_type": "RDBMS",
+    "severity": "P0",
+    "message": "FATAL: could not connect to server: Connection refused",
+    "error_code": "ERR_CONNECTION_REFUSED",
+    "source_host": "app-server-01",
+    "metadata": { "port": 5432, "database": "production_db", "pool_size": 20 }
+  },
+  {
+    "component_id": "CACHE_CLUSTER_01",
+    "component_type": "CACHE",
+    "severity": "P2",
+    "message": "OOM command not allowed when used memory > 'maxmemory'",
+    "error_code": "ERR_OOM",
+    "source_host": "cache-node-01",
+    "metadata": { "memory_used_mb": 4050, "max_memory_mb": 4096 }
+  },
+  {
+    "component_id": "CACHE_CLUSTER_01",
+    "component_type": "CACHE",
+    "severity": "P2",
+    "message": "OOM command not allowed when used memory > 'maxmemory'",
+    "error_code": "ERR_OOM",
+    "source_host": "cache-node-02",
+    "metadata": { "memory_used_mb": 4060, "max_memory_mb": 4096 }
+  },
+  {
+    "component_id": "API_GATEWAY_01",
+    "component_type": "API",
+    "severity": "P1",
+    "message": "HTTP 503 Service Unavailable — upstream connection failure",
+    "error_code": "HTTP_503",
+    "source_host": "lb-node-01",
+    "metadata": { "upstream": "POSTGRES_PRIMARY", "request_id": "req-abc123" }
+  },
+  {
+    "component_id": "MCP_HOST_PRIMARY",
+    "component_type": "MCP_HOST",
+    "severity": "P0",
+    "message": "MCP host health check failed — no response in 30s",
+    "error_code": "ERR_HEALTH_CHECK_TIMEOUT",
+    "source_host": "orchestrator-01",
+    "metadata": { "consecutive_failures": 3, "last_success": "2024-01-01T10:00:00Z" }
+  },
+  {
+    "component_id": "KAFKA_CLUSTER_MAIN",
+    "component_type": "ASYNC_QUEUE",
+    "severity": "P1",
+    "message": "Consumer group lag exceeds threshold: 15000 messages behind",
+    "error_code": "ERR_CONSUMER_LAG",
+    "source_host": "kafka-broker-01",
+    "metadata": { "consumer_group": "payment-processor", "lag": 15000, "partition": 2 }
+  },
+  {
+    "component_id": "NOSQL_CLUSTER_01",
+    "component_type": "NOSQL",
+    "severity": "P2",
+    "message": "MongoDB write timeout — secondary replication lag too high",
+    "error_code": "ERR_WRITE_TIMEOUT",
+    "source_host": "mongo-primary",
+    "metadata": { "replication_lag_ms": 45000, "write_concern": "majority" }
+  }
+]
