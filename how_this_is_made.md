@@ -76,4 +76,11 @@ The system exports deep visibility metrics to a Prometheus/Grafana stack:
 -   **Unit Tests**: A suite of 56 tests covering everything from state transitions to MTTR math accuracy.
 
 ---
+
+## 7. Visual Evidence
+
+Comprehensive screenshots of the working system, including the Live Dashboard, Chaos Simulation results, and Grafana Metrics, are available in the `Working_screenshots/` directory.
+
+---
+
 *This system represents a robust implementation of modern distributed systems principles, focusing on reliability, scalability, and strict data governance.*
