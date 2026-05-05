@@ -12,7 +12,18 @@ The central challenge of this system was to handle massive bursts of data (10,00
 3.  **Durable Transport (Kafka)**: Signals are then pushed to a Kafka topic (`raw-signals`). This ensures that even if downstream processors are slow or down, the data is safely persisted.
 4.  **Partitioning**: Data is partitioned by `component_id`. This guarantees that signals for the same service are processed in chronological order while allowing multiple consumers to scale horizontally for parallel processing.
 
-## 2. Polyglot Persistence Strategy
+## 2. Core Features & Value Proposition
+
+| Feature | How it works | Why it matters (The Value) |
+|---|---|---|
+| **Durable Ingestion** | Signals are buffered in Kafka before processing. | **Zero Data Loss**: Even if the entire backend service crashes, no error signals are lost; they are processed as soon as services recover. |
+| **Intelligent Debouncing** | Collapses 100s of related signals into 1 incident. | **Prevents Alert Fatigue**: Responders see one clear problem instead of a "wall of noise," allowing for 99% faster identification. |
+| **Strict State Machine** | Code-level enforcement of incident transitions. | **Data Integrity**: Ensures every closed incident has a mandatory root cause analysis (RCA), creating a perfect audit trail for compliance. |
+| **Auto-MTTR Logic** | Calculates repair time from first signal to resolution. | **Performance Visibility**: Provides immediate, non-biased metrics on team efficiency and system reliability without manual entry. |
+| **Governance Gateway** | Intercepts and monitors all AI/LLM traffic. | **Cost Protection**: Real-time spend tracking and quotas prevent runaway cloud bills while still enabling intelligent incident analysis. |
+| **Real-time Dashboard** | WebSocket-driven UI for live incident tracking. | **Reduces MTTD**: Operators see system failures the second they happen, allowing for immediate intervention. |
+
+## 3. Polyglot Persistence Strategy
 
 Different data types in this system have different requirements, leading to the use of three distinct databases:
 
