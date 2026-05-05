@@ -25,16 +25,16 @@ This document tracks the requirements fulfillment for the **Mission-Critical Inc
 - **MTTR Calculation**: Automatically calculated as `First Signal (created_at)` -> `RCA Submission (now)`.
 - **UI Dashboard**: React-based live feed with WebSocket updates and drill-down details.
 
-### 5. Technical Constraints & Resilience
+### 5. Technical Constraints & Reliability
 - **Concurrency**: Modern Python `asyncio` primitives used throughout.
 - **Rate Limiting**: Distributed Token Bucket implemented in Redis.
 - **Observability**: `/health` endpoint + `/metrics` (Prometheus) + Grafana dashboards + Structured Logging.
 
 ## 🎁 Bonus Features (Out of the Box)
-- **AI-Powered RCA**: LLM Integration for automatic root cause suggestions on P0/P1 incidents.
-- **LLMOps Gateway**: Full observability for AI spend, tokens, and cost-based rate limiting.
-- **Infrastructure as Code**: Ready-to-scale Docker Compose architecture with SRE Roadmap.
-- **Chaos Simulator**: Advanced script to mock failure events across the entire stack.
+- **AI-Powered Analysis**: LLM Integration for automatic root cause suggestions on P0/P1 incidents.
+- **Governance Gateway**: Full observability for external API spend, tokens, and cost-based rate limiting.
+- **Scalable Architecture**: Ready-to-scale Docker Compose architecture with technical roadmap.
+- **Failure Simulator**: Advanced script to mock failure events across the entire stack.
 
 ---
 *Created for the Engineering Assignment evaluation.*

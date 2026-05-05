@@ -1,7 +1,7 @@
 # Mission-Critical Incident Management System (IMS)
 
 [![Architecture](https://img.shields.io/badge/Architecture-Distributed-blue.svg)](#architecture)
-[![SRE](https://img.shields.io/badge/SRE-Observable-green.svg)](#sre-observability-stack)
+[![Reliability](https://img.shields.io/badge/System-Reliable-green.svg)](#reliability--observability)
 [![Pattern](https://img.shields.io/badge/Pattern-State%20%7C%20Strategy-orange.svg)](#design-patterns)
 
 > A production-grade, real-time Incident Management System designed to handle **10,000 signals per second** with strict lifecycle enforcement and multi-layer resilience.
@@ -46,7 +46,7 @@ The system uses a **Decoupled Event-Driven Architecture** to ensure that signal 
 │                     └───────┬──────┘  └──────────────┘                │
 │                             │                                         │
 │                     ┌───────▼────────────────┐                        │
-│                     │  LLM Gateway (AI SRE)  │                        │
+│                     │  LLM Gateway           │                        │
 │                     │ - Rate Limiting        │                        │
 │                     │ - Token/Spend Tracking │                        │
 │                     │ - Auto-RCA Generator   │                        │
@@ -91,9 +91,9 @@ The system implements a **4-Layer Defense in Depth** to handle massive bursts an
 
 ---
 
-## 📊 SRE Observability Stack
+## 📊 Reliability & Observability
 
-This project features a production-ready observability suite for monitoring **Service Level Objectives (SLOs)**.
+This project features a production-ready observability suite for monitoring system health and throughput.
 
 *   **P99 Processing Latency**: Tracked via Prometheus histograms (`ims_signal_processing_latency_seconds`).
 *   **Throughput Monitoring**: Real-time counters for ingestion and processing rates.
@@ -102,9 +102,9 @@ This project features a production-ready observability suite for monitoring **Se
 
 ---
 
-## 🤖 AI SRE & LLMOps
+## 🤖 Intelligent Incident Analysis
 
-To demonstrate "New Age" SRE skills, the system integrates an **AI Root Cause Assistant** governed by a strict **LLM Gateway**. High-severity incidents automatically query an LLM for remediation steps, while the gateway enforces:
+To enhance incident mediation, the system integrates an **Root Cause Assistant** governed by a strict **LLM Gateway**. High-severity incidents automatically query an LLM for remediation steps, while the gateway enforces:
 
 *   **Spend Tracking**: Financial cost is calculated per request and exposed as `ims_llm_spend_dollars`.
 *   **Token Observability**: Tracks prompt and completion tokens (`ims_llm_tokens_total`).
@@ -130,7 +130,7 @@ docker-compose up -d --build
 |---|---|---|
 | **Dashboard** | http://localhost:3000 | Real-time Incident Console |
 | **Locust** | http://localhost:8089 | Load Testing / Benchmarking |
-| **Prometheus** | http://localhost:9090 | SRE Metrics Aggregator |
+| **Prometheus** | http://localhost:9090 | Metrics Aggregator |
 | **Grafana** | http://localhost:3001 | Visualization (admin/admin) |
 | **API Docs** | http://localhost:8000/docs | Interactive Swagger UI |
 | **Metrics** | http://localhost:8000/metrics | Scrape endpoint |
@@ -181,12 +181,12 @@ cd backend && pytest tests/ -v
 | **Alerting Strategy** | ✅ PASS | Priority-based routing implemented and tested. |
 | **Backpressure Layering** | ✅ PASS | Rate Limiter + Kafka + Buffer implemented. |
 | **Real-time Dashboard** | ✅ PASS | WebSocket-driven React UI with live updates. |
-| **Observability (SRE)** | ✅ PASS | Prometheus/Grafana stack integrated. |
+| **Observability** | ✅ PASS | Prometheus/Grafana stack integrated. |
 | **Persistence (ACID)** | ✅ PASS | PostgreSQL for incidents; MongoDB for audit log. |
 
 ---
  
- ## 🛤 Future Architecture & SRE Roadmap
+ ## 🛤 Future Architecture & Technical Roadmap
  
  *This section outlines how to scale this system from a local prototype to an enterprise-grade global platform.*
  
@@ -206,4 +206,4 @@ cd backend && pytest tests/ -v
  
  ---
  
- 👨‍💻 **Developed with SRE Principles by Antigravity (Advanced Agentic Coding)**
+ 👨‍💻 **Technical Implementation Overview**
