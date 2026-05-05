@@ -23,7 +23,30 @@ The central challenge of this system was to handle massive bursts of data (10,00
 | **Governance Gateway** | Intercepts and monitors all AI/LLM traffic. | **Cost Protection**: Real-time spend tracking and quotas prevent runaway cloud bills while still enabling intelligent incident analysis. |
 | **Real-time Dashboard** | WebSocket-driven UI for live incident tracking. | **Reduces MTTD**: Operators see system failures the second they happen, allowing for immediate intervention. |
 
-## 3. Polyglot Persistence Strategy
+## 3. New Features (Out-of-the-Box Innovations)
+
+These advanced features were implemented to provide institutional-grade reliability and intelligent automation beyond the basic requirements:
+
+### 🚀 AI-Powered Incident Mediation
+- **What it is**: For high-severity incidents (P0/P1), the system automatically invokes an intelligent analysis engine to suggest root causes and remediation steps.
+- **Technical Implementation**: Integrated with an LLM via the `app/llm/gateway.py`. It uses the first signal's metadata and system logs as context to generate a draft RCA immediately.
+
+### 📉 Financial Observability & Governance Gateway
+- **What it is**: A sophisticated proxy layer for all external API/LLM calls that provides real-time cost transparency.
+- **Technical Implementation**: Tracks prompt/completion tokens and calculates financial spend in USD per request. Metrics are exported as `ims_llm_spend_dollars` and `ims_llm_tokens_total`, allowing for automated budget-based rate limiting.
+
+### 🐒 Chaos Engineering Simulator
+- **What it is**: A standalone automation tool used to stress-test the system's resilience by injecting real failures.
+- **Technical Implementation**: Located in `sample-data/chaos_simulator.py`. It mocks various failure modes:
+  - **RDBMS Primary Outage**: Forces the system into the circuit-breaking retry state.
+  - **Signal Storms**: Bursts 10,000+ signals to verify rate limiting and Kafka buffering.
+  - **Redis Exhaustion**: Tests the "Graceful Degradation" of the dashboard cache.
+
+### 📡 Reactive Real-Time Feed (WebSocket)
+- **What it is**: A high-performance notification system that pushes incident updates to the UI without polling.
+- **Technical Implementation**: Uses FastAPI WebSockets and an asynchronous `ConnectionManager` to broadcast state changes (e.g., incident created, status updated) instantly to all connected clients.
+
+## 4. Polyglot Persistence Strategy
 
 Different data types in this system have different requirements, leading to the use of three distinct databases:
 
