@@ -175,6 +175,7 @@ class WorkItemContext:
                 notes=self._notes,
             )
             session.add(transition_log)
+            await session.commit()
 
         # Invalidate cache
         await invalidate_incident_cache(self.work_item_id)

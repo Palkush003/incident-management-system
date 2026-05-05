@@ -15,7 +15,7 @@ from app.kafka.producer import init_producer, close_producer
 from app.kafka.consumer import init_consumer, close_consumer
 from app.engine.debouncer import process_signal
 from app.middleware.rate_limiter import RateLimiterMiddleware
-from app.utils.metrics import metrics_collector
+from app.utils.metrics import metrics_collector, metrics_app
 from app.api import signals, work_items, rca, dashboard, health
 
 # Configure structured logging
@@ -95,6 +95,9 @@ app.include_router(signals.router)
 app.include_router(work_items.router)
 app.include_router(rca.router)
 app.include_router(dashboard.router)
+
+# Mount Prometheus metrics endpoint
+app.mount("/metrics", metrics_app)
 
 
 @app.get("/", include_in_schema=False)

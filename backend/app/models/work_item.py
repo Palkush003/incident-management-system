@@ -51,7 +51,7 @@ class WorkItemResponse(BaseModel):
     mttr_minutes: float | None = None
     created_at: datetime
     updated_at: datetime
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="extra_metadata")
 
     model_config = {"from_attributes": True}
 

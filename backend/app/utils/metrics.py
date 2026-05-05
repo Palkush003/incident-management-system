@@ -1,15 +1,59 @@
-"""
-Throughput metrics collector.
-Tracks signals ingested/processed/dropped per second.
-Prints a report to console every METRICS_INTERVAL_SECONDS.
-"""
 import asyncio
 import time
 from dataclasses import dataclass, field
 from threading import Lock
 import structlog
+from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 
 log = structlog.get_logger(__name__)
+
+# ── Prometheus Metrics ───────────────────────────────────────────────────────
+# These are standard metrics that an SRE would monitor in a cluster.
+
+INGESTED_TOTAL = Counter(
+    "ims_signals_ingested_total", 
+    "Total signals ingested into the system"
+)
+PROCESSED_TOTAL = Counter(
+    "ims_signals_processed_total", 
+    "Total signals processed by the pipeline"
+)
+DROPPED_TOTAL = Counter(
+    "ims_signals_dropped_total", 
+    "Total signals dropped due to backpressure/overflow"
+)
+ACTIVE_INCIDENTS = Gauge(
+    "ims_active_incidents", 
+    "Current number of open incidents"
+)
+PROCESSING_LATENCY = Histogram(
+    "ims_signal_processing_latency_seconds",
+    "Time taken to process a signal from Kafka to DB",
+    buckets=(0.01, 0.05, 0.1, 0.5, 1.0, 2.5, 5.0)
+)
+KAFKA_PRODUCER_ERRORS = Counter(
+    "ims_kafka_producer_errors_total",
+    "Total errors encountered by the Kafka producer"
+)
+
+# ── LLMOps Metrics ───────────────────────────────────────────────────────────
+LLM_TOKENS_TOTAL = Counter(
+    "ims_llm_tokens_total",
+    "Total prompt and completion tokens used by the AI RCA assistant"
+)
+LLM_SPEND_DOLLARS = Counter(
+    "ims_llm_spend_dollars",
+    "Total financial cost (USD) incurred by the AI RCA assistant"
+)
+LLM_LATENCY = Histogram(
+    "ims_llm_generation_latency_seconds",
+    "Time taken for the LLM to generate an RCA suggestion",
+    buckets=(0.5, 1.0, 2.0, 5.0, 10.0, 30.0)
+)
+LLM_RATE_LIMIT_DROPS = Counter(
+    "ims_llm_rate_limited_total",
+    "Number of times an AI request was blocked to prevent runaway costs"
+)
 
 
 @dataclass
@@ -25,18 +69,36 @@ class MetricsCollector:
     def increment_ingested(self, n: int = 1) -> None:
         with self._lock:
             self._ingested += n
+            INGESTED_TOTAL.inc(n)
 
     def increment_processed(self, n: int = 1) -> None:
         with self._lock:
             self._processed += n
+            PROCESSED_TOTAL.inc(n)
 
     def increment_dropped(self, n: int = 1) -> None:
         with self._lock:
             self._dropped += n
+            DROPPED_TOTAL.inc(n)
 
     def set_active_incidents(self, n: int) -> None:
         with self._lock:
             self._active_incidents = n
+            ACTIVE_INCIDENTS.set(n)
+
+    def observe_latency(self, seconds: float) -> None:
+        PROCESSING_LATENCY.observe(seconds)
+
+    def record_kafka_error(self) -> None:
+        KAFKA_PRODUCER_ERRORS.inc()
+
+    def record_llm_usage(self, tokens: int, cost: float, latency: float) -> None:
+        LLM_TOKENS_TOTAL.inc(tokens)
+        LLM_SPEND_DOLLARS.inc(cost)
+        LLM_LATENCY.observe(latency)
+
+    def record_llm_rate_limit(self) -> None:
+        LLM_RATE_LIMIT_DROPS.inc()
 
     def snapshot(self) -> dict:
         with self._lock:
@@ -48,7 +110,8 @@ class MetricsCollector:
                 "active_incidents": self._active_incidents,
                 "elapsed_sec": round(elapsed, 1),
             }
-            # Reset counters
+            # Reset local counters for console reporting, 
+            # but Prometheus counters keep growing (standard practice)
             self._ingested = 0
             self._processed = 0
             self._last_reset = time.monotonic()
@@ -79,14 +142,10 @@ class MetricsCollector:
                 dropped_total=snap["dropped_total"],
                 active_incidents=snap["active_incidents"],
             )
-            print(
-                f"\033[36m[METRICS]\033[0m "
-                f"Ingested: \033[33m{snap['signals_per_sec']}/s\033[0m | "
-                f"Processed: \033[32m{snap['processed_per_sec']}/s\033[0m | "
-                f"Dropped: \033[31m{snap['dropped_total']}\033[0m | "
-                f"Active Incidents: \033[35m{snap['active_incidents']}\033[0m"
-            )
 
 
 # Global singleton
 metrics_collector = MetricsCollector()
+
+# Prometheus ASGI app to expose /metrics
+metrics_app = make_asgi_app()

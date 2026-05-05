@@ -174,3 +174,42 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
+  # ─── Monitoring Stack ──────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    container_name: ims_prometheus
+    networks: [ims_network]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=1d'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss:10.4.2
+    container_name: ims_grafana
+    networks: [ims_network]
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    restart: unless-stopped
+
+  locust:
+    image: locustio/locust
+    container_name: ims_locust
+    networks: [ims_network]
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./load-test:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --host http://backend:8000
+    restart: unless-stopped

@@ -42,13 +42,16 @@ async def process_signal(payload: dict) -> None:
     Main signal processor. Called for every message from Kafka.
     Thread-safe per component_id via asyncio locks.
     """
+    start_time = asyncio.get_event_loop().time()
     component_id = payload["component_id"]
     lock = await _get_component_lock(component_id)
 
     async with lock:
         await _debounce_and_store(payload)
 
+    latency = asyncio.get_event_loop().time() - start_time
     metrics_collector.increment_processed()
+    metrics_collector.observe_latency(latency)
 
 
 async def _debounce_and_store(payload: dict) -> None:
@@ -109,7 +112,7 @@ async def _create_work_item(payload: dict, signal_id: str, work_item_id: str) ->
 
     async with get_db() as session:
         session.add(work_item)
-        await session.flush()
+        await session.commit()
 
     # Link signal to work item in MongoDB
     await _link_signal_to_work_item(signal_id, work_item_id, payload["component_id"])
@@ -124,6 +127,11 @@ async def _create_work_item(payload: dict, signal_id: str, work_item_id: str) ->
             message=payload.get("message", ""),
         )
     )
+
+    # Fire AI RCA generation for high severity incidents
+    if severity in ["P0", "P1"]:
+        from app.llm.gateway import generate_ai_rca
+        asyncio.create_task(generate_ai_rca(work_item_id, payload))
 
     # Notify WebSocket subscribers
     await ws_manager.broadcast({
@@ -162,3 +170,4 @@ async def _link_signal_to_work_item(signal_id: str, work_item_id: str, component
             .where(WI.id == work_item_id)
             .values(signal_count=WI.signal_count + 1)
         )
+        await session.commit()

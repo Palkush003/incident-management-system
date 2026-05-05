@@ -224,5 +224,6 @@ async def _log_alert_to_db(ctx: AlertContext, priority: str, alert_type: str, ch
                 payload=payload,
             )
             session.add(alert)
+            await session.commit()
     except Exception as exc:
         log.error("alert.db_log.failed", error=str(exc))

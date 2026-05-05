@@ -53,8 +53,8 @@ async def submit_rca(work_item_id: str, body: RCACreate) -> RCAResponse:
                 detail="An RCA for this Work Item already exists. Use PATCH to update.",
             )
 
-        # Calculate MTTR
-        mttr = calculate_mttr_minutes(body.incident_start, body.incident_end)
+        # Calculate MTTR (Assignment Requirement: First Signal -> RCA Submission)
+        mttr = calculate_mttr_minutes(work_item.created_at, datetime.utcnow())
 
         # Persist RCA record
         rca_id = str(uuid.uuid4())
@@ -80,6 +80,7 @@ async def submit_rca(work_item_id: str, body: RCACreate) -> RCAResponse:
             .where(WorkItemORM.id == work_item_id)
             .values(rca_id=rca_id, mttr_minutes=mttr, updated_at=datetime.utcnow())
         )
+        await session.commit()
 
     await invalidate_incident_cache(work_item_id)
 
